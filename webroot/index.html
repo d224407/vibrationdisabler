@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Vibrator Controller</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="top-bar">
+  <div class="eyebrow">Root Module</div>
+  <h1>Vibrator Controller</h1>
+</div>
+
+<div class="content">
+  <div class="banner">Changes take effect immediately. A reboot is required for the disabled list to persist across restarts.</div>
+
+  <div class="stat-card">
+    <span class="label">Vibration disabled</span>
+    <span class="value" id="disabledCount">0</span>
+  </div>
+
+  <div class="search-bar">
+    <svg width="20" height="20" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+    <input type="text" id="searchInput" placeholder="Search apps">
+  </div>
+
+  <div class="segmented">
+    <button class="active" data-tab="disabled">Disabled</button>
+    <button data-tab="all">All apps</button>
+  </div>
+
+  <div class="option-row">
+    <span class="option-label">Show system apps</span>
+    <div class="switch" id="systemAppSwitch">
+      <div class="thumb"></div>
+    </div>
+  </div>
+
+  <div class="list-card">
+    <div class="list-scroll" id="appList">
+      <div class="state-view">
+        <div class="spinner"></div>
+        <div class="title">Loading</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
