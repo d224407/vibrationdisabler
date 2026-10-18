@@ -7,38 +7,36 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="top-bar">
-  <div class="eyebrow">Root Module</div>
-  <h1>Vibrator Controller</h1>
-</div>
 
-<div class="content">
-  <div class="banner">Changes take effect immediately. A reboot is required for the disabled list to persist across restarts.</div>
-
-  <div class="stat-card">
-    <span class="label">Vibration disabled</span>
-    <span class="value" id="disabledCount">0</span>
-  </div>
-
-  <div class="search-bar">
-    <svg width="20" height="20" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
-    <input type="text" id="searchInput" placeholder="Search apps">
-  </div>
-
-  <div class="segmented">
-    <button class="active" data-tab="disabled">Disabled</button>
-    <button data-tab="all">All apps</button>
-  </div>
-
-  <div class="option-row">
-    <span class="option-label">Show system apps</span>
-    <div class="switch" id="systemAppSwitch">
-      <div class="thumb"></div>
+<div class="panel" id="panel">
+  <div class="search-bar-wrap" id="searchBarWrap">
+    <div class="search-bar" id="searchBar">
+      <svg width="20" height="20" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+      <input type="text" id="searchInput" placeholder="Search name or package" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <button class="search-clear" id="searchClear" aria-label="Clear"><span class="mi">close</span></button>
     </div>
   </div>
 
-  <div class="list-card">
-    <div class="list-scroll" id="appList">
+  <div class="panel-inner">
+    <div class="list-container">
+      <div class="tweak-row note-row">
+        <span class="mi">info</span>
+        <div class="tweak-info"><div class="tweak-desc">Muted apps can't vibrate. Applies instantly, re-applied on boot.</div></div>
+      </div>
+    </div>
+
+    <div class="list-container opt-box" id="optBox">
+      <div class="tweak-row opt-row" id="rowSystem">
+        <div class="tweak-info">
+          <span class="tweak-name">Show system apps</span>
+          <div class="tweak-desc">Include preinstalled apps</div>
+        </div>
+        <div class="switch" id="systemSwitch"><div class="thumb"></div></div>
+      </div>
+    </div>
+
+    <div class="list-title" id="listTitle"></div>
+    <div class="list-container" id="appList">
       <div class="state-view">
         <div class="spinner"></div>
         <div class="title">Loading</div>
@@ -46,6 +44,20 @@
     </div>
   </div>
 </div>
+
+<nav id="nav-bar" class="nav-bar" role="navigation" aria-label="Main navigation">
+  <div id="nav-indicator" class="nav-indicator" aria-hidden="true"></div>
+
+  <button class="nav-tab nav-tab--active" data-panel="apps" aria-current="page">
+    <span class="nav-icon">apps</span>
+    <span class="nav-label">Apps</span>
+  </button>
+
+  <button class="nav-tab" data-panel="muted">
+    <span class="nav-icon">vibration</span>
+    <span class="nav-label">Muted</span>
+  </button>
+</nav>
 
 <script src="script.js"></script>
 </body>

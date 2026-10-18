@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - update.json
+      - changelog.md
+      - README.md
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read module.prop
+        id: prop
+        run: |
+          get() { grep -m1 "^$1=" module.prop | cut -d= -f2- | tr -d '\r'; }
+          ID=$(get id)
+          VERSION=$(get version)
+          CODE=$(get versionCode)
+          [ -n "$ID" ] && [ -n "$VERSION" ] || { echo "module.prop needs id and version"; exit 1; }
+          case "$CODE" in ''|*[!0-9]*) echo "versionCode must be a number"; exit 1 ;; esac
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+          echo "zip=$ID-$VERSION.zip" >> "$GITHUB_OUTPUT"
+
+      - name: Pack module
+        run: |
+          mkdir -p dist
+          zip -r9 -X "dist/${{ steps.prop.outputs.zip }}" . \
+            -x ".git/*" ".github/*" ".gitignore" "dist/*" "*.zip" \
+               "README.md" "update.json" "changelog.md"
+          unzip -l "dist/${{ steps.prop.outputs.zip }}"
+
+      - name: Changelog
+        run: |
+          VERSION="${{ steps.prop.outputs.version }}"
+          PREV=$(git describe --tags --abbrev=0 --exclude "$VERSION" HEAD 2>/dev/null || true)
+          if [ -n "$PREV" ]; then RANGE="$PREV..HEAD"; else RANGE="-n 15"; fi
+          LOG=$(git log $RANGE --no-merges --pretty='- %s' --invert-grep --grep='^chore: update' || true)
+          [ -n "$LOG" ] || LOG="- Rebuild"
+          printf '# %s %s\n\n%s\n' "${{ steps.prop.outputs.id }}" "$VERSION" "$LOG" > changelog.md
+          printf '%s\n' "$LOG" > notes.md
+          cat changelog.md
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ steps.prop.outputs.version }}"
+          gh release delete "$VERSION" --cleanup-tag --yes 2>/dev/null || true
+          gh release create "$VERSION" "dist/${{ steps.prop.outputs.zip }}" \
+            --title "$VERSION" \
+            --notes-file notes.md \
+            --target "$GITHUB_SHA" \
+            --latest
+
+      - name: Update update.json
+        run: |
+          VERSION="${{ steps.prop.outputs.version }}"
+          BRANCH="${{ github.ref_name }}"
+          jq -n \
+            --arg version "$VERSION" \
+            --argjson code ${{ steps.prop.outputs.code }} \
+            --arg zip "https://github.com/${{ github.repository }}/releases/download/$VERSION/${{ steps.prop.outputs.zip }}" \
+            --arg log "https://raw.githubusercontent.com/${{ github.repository }}/$BRANCH/changelog.md" \
+            '{version: $version, versionCode: $code, zipUrl: $zip, changelog: $log}' > update.json
+          cat update.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add update.json changelog.md
+          if git diff --cached --quiet; then
+            echo "update.json already up to date"
+          else
+            git commit -m "chore: update.json for $VERSION [skip ci]"
+            git pull --rebase origin "$BRANCH"
+            git push origin "HEAD:$BRANCH"
+          fi
