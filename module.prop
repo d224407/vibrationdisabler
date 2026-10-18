@@ -1,5 +1,5 @@
-id=vibratorcontroller
-name=Vibrator Controller
+id=vibrationdisabler
+name=Vibration Disabler
 version=v1.2
 versionCode=3
 author=d224407

@@ -1,6 +1,6 @@
 "use strict";
 
-const MODDIR = "/data/adb/modules/vibratorcontroller";
+const MODDIR = "/data/adb/modules/vibrationdisabler";
 const APPS_FILE = MODDIR + "/apps.txt";
 const PKG_RE = /^[A-Za-z][A-Za-z0-9_.]*$/;
 
